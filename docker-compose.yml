@@ -1,0 +1,69 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: cliprelay-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: cliprelay
+      POSTGRES_PASSWORD: cliprelay
+      POSTGRES_DB: cliprelay
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - cliprelay-net
+
+  redis:
+    image: redis:7
+    container_name: cliprelay-redis
+    restart: always
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - cliprelay-net
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: cliprelay-rabbitmq
+    restart: always
+    environment:
+      RABBITMQ_DEFAULT_USER: cliprelay
+      RABBITMQ_DEFAULT_PASS: cliprelay
+    ports:
+      - "5672:5672"     # AMQP
+      - "15672:15672"   # Management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - cliprelay-net
+
+  minio:
+    image: minio/minio:latest
+    container_name: cliprelay-minio
+    restart: always
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: cliprelay
+      MINIO_ROOT_PASSWORD: cliprelay
+    ports:
+      - "9000:9000"   # S3 API
+      - "9001:9001"   # Web console
+    volumes:
+      - minio_data:/data
+    networks:
+      - cliprelay-net
+
+volumes:
+  postgres_data:
+  redis_data:
+  rabbitmq_data:
+  minio_data:
+
+networks:
+  cliprelay-net:
