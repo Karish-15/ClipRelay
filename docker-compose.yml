@@ -1,4 +1,4 @@
-version: "3.9"
+version: "4.9"
 
 services:
   postgres:
@@ -58,6 +58,20 @@ services:
       - minio_data:/data
     networks:
       - cliprelay-net
+
+  outbox-worker:
+    build:
+      context: ./server/bg-workers/outbox-worker
+      dockerfile: Dockerfile
+    container_name: cliprelay-outbox-worker
+    restart: always
+    env_file:
+      - ./server/bg-workers/outbox-worker/.env
+    depends_on:
+      - postgres
+      - rabbitmq
+    networks:
+      -cliprelay-net
 
 volumes:
   postgres_data:
