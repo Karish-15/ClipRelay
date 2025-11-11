@@ -71,7 +71,7 @@ services:
       - postgres
       - rabbitmq
     networks:
-      -cliprelay-net
+      - cliprelay-net
 
 volumes:
   postgres_data:

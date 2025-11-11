@@ -68,6 +68,7 @@ func main() {
 			}
 		}
 
+		log.Printf("published %d events to queue", len(ids))
 		sleep(pollMS)
 	}
 }

@@ -32,7 +32,7 @@ func (r *OutboxRepo) FetchAndClaim(ctx context.Context, workerID string, limit i
 
 	rows, err := tx.QueryContext(ctx, `
         SELECT id, event_type, payload
-        FROM outbox
+        FROM outboxes
         WHERE processed = false
 			AND (
                 in_progress = false
@@ -71,7 +71,7 @@ func (r *OutboxRepo) FetchAndClaim(ctx context.Context, workerID string, limit i
 	}
 
 	_, err = tx.ExecContext(ctx, `
-        UPDATE outbox
+        UPDATE outboxes
         SET in_progress = true,
             taken_at = now(),
             taken_by = $1
@@ -91,7 +91,7 @@ func (r *OutboxRepo) FetchAndClaim(ctx context.Context, workerID string, limit i
 
 func (r *OutboxRepo) MarkProcessed(ctx context.Context, ids []int64) error {
 	_, err := r.db.ExecContext(ctx, `
-        UPDATE outbox
+        UPDATE outboxes
         SET processed = true,
             in_progress = false,
             taken_by = NULL,
@@ -103,7 +103,7 @@ func (r *OutboxRepo) MarkProcessed(ctx context.Context, ids []int64) error {
 
 func (r *OutboxRepo) Release(ctx context.Context, ids []int64) error {
 	_, err := r.db.ExecContext(ctx, `
-        UPDATE outbox
+        UPDATE outboxes
         SET in_progress = false,
             taken_by = NULL,
             taken_at = NULL
