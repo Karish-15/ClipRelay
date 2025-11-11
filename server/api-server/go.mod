@@ -14,6 +14,7 @@ require (
 )
 
 require (
+	github.com/buraksezer/consistent v0.10.0 // indirect
 	github.com/bytedance/sonic v1.14.0 // indirect
 	github.com/bytedance/sonic/loader v0.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect

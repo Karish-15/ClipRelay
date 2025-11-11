@@ -20,11 +20,12 @@ func main() {
 	blob := initializers.CreateAndInitMinIO()
 	bus := outbox.NewBus(db)
 	cache := initializers.ConnectRedisClient()
+	consistentRing := initializers.InitConsistentHashingRing()
 
 	bus.Start(ctx)
 	r := gin.Default()
 
-	modules.RegisterAll(r, db, blob, cache, bus)
+	modules.RegisterAll(r, db, blob, cache, bus, consistentRing)
 
 	if err := r.Run(":8080"); err != nil {
 		panic("Error! Failed to start application.")
