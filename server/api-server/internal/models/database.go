@@ -33,9 +33,15 @@ type ClipBlobMetadata struct {
 }
 
 type Outbox struct {
-	ID        int       `gorm:"primaryKey;autoIncrement"`
-	EventType string    `gorm:"size:100;not null"`   // e.g., "clip.created"
-	Payload   string    `gorm:"type:jsonb;not null"` // serialized event payload
+	ID        int64  `gorm:"primaryKey;autoIncrement"`
+	EventType string `gorm:"size:100;not null"`
+	Payload   string `gorm:"type:jsonb;not null"`
+
 	CreatedAt time.Time `gorm:"autoCreateTime"`
-	Processed bool      `gorm:"default:false"` // worker flips this after publishing
+
+	// Processing fields
+	Processed  bool       `gorm:"not null;default:false"` // final success flag
+	InProgress bool       `gorm:"not null;default:false"` // claimed by worker
+	TakenAt    *time.Time `gorm:""`                       // null means not claimed
+	TakenBy    *string    `gorm:"size:100"`               // worker ID
 }
