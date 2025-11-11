@@ -8,6 +8,7 @@ import (
 
 	"api-server/internal/constants"
 	"api-server/internal/models"
+	"api-server/internal/modules/outbox"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -16,14 +17,16 @@ import (
 )
 
 type ClipService struct {
-	DB   *gorm.DB
-	Blob *minio.Client
+	DB        *gorm.DB
+	Blob      *minio.Client
+	OutboxBus *outbox.Bus
 }
 
-func NewService(db *gorm.DB, blob *minio.Client) *ClipService {
+func NewService(db *gorm.DB, blob *minio.Client, bus *outbox.Bus) *ClipService {
 	return &ClipService{
-		DB:   db,
-		Blob: blob,
+		DB:        db,
+		Blob:      blob,
+		OutboxBus: bus,
 	}
 }
 
@@ -71,6 +74,9 @@ func (s *ClipService) CreateTextClip(userID int, content string) (*models.Clip, 
 		return nil, err
 	}
 
+	// Event added
+	s.OutboxBus.CreateClipEvent(*clip, nil)
+
 	return clip, nil
 }
 
@@ -111,6 +117,8 @@ func (s *ClipService) CreateBlobClip(fileID string, userID int) (*models.Clip, e
 	if err := s.DB.Save(&meta).Error; err != nil {
 		return nil, err
 	}
+
+	s.OutboxBus.CreateClipEvent(*clip, &meta)
 
 	return clip, nil
 }

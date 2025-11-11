@@ -1,8 +1,11 @@
 package main
 
 import (
+	"context"
+
 	"api-server/internal/initializers"
 	"api-server/internal/modules"
+	"api-server/internal/modules/outbox"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -10,13 +13,17 @@ import (
 
 func main() {
 	_ = godotenv.Load()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	db := initializers.InitializeDatabaseAndMigrate()
 	blob := initializers.CreateAndInitMinIO()
+	bus := outbox.NewBus(db)
 
+	bus.Start(ctx)
 	r := gin.Default()
 
-	modules.RegisterAll(r, db, blob)
+	modules.RegisterAll(r, db, blob, bus)
 
 	if err := r.Run(":8080"); err != nil {
 		panic("Error! Failed to start application.")

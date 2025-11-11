@@ -6,3 +6,5 @@ const (
 	PENDING  Status = "PENDING"
 	UPLOADED Status = "UPLOADED"
 )
+
+const EventClipCreated = "clip.created"

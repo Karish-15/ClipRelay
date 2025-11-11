@@ -2,14 +2,15 @@ package clips
 
 import (
 	"api-server/internal/middlewares"
+	"api-server/internal/modules/outbox"
 
 	"github.com/gin-gonic/gin"
 	"github.com/minio/minio-go/v7"
 	"gorm.io/gorm"
 )
 
-func Register(db *gorm.DB, blob *minio.Client, r *gin.Engine) {
-	service := NewService(db, blob)
+func Register(db *gorm.DB, blob *minio.Client, bus *outbox.Bus, r *gin.Engine) {
+	service := NewService(db, blob, bus)
 	handler := NewHandler(service)
 
 	clips := r.Group("/clips")

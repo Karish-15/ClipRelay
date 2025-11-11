@@ -3,6 +3,7 @@ package modules
 import (
 	"api-server/internal/modules/auth"
 	"api-server/internal/modules/clips"
+	"api-server/internal/modules/outbox"
 	"api-server/internal/modules/users"
 
 	"github.com/gin-gonic/gin"
@@ -10,8 +11,8 @@ import (
 	"gorm.io/gorm"
 )
 
-func RegisterAll(r *gin.Engine, db *gorm.DB, blob *minio.Client) {
+func RegisterAll(r *gin.Engine, db *gorm.DB, blob *minio.Client, bus *outbox.Bus) {
 	users.Register(db, r)
-	clips.Register(db, blob, r)
+	clips.Register(db, blob, bus, r)
 	auth.Register(db, r)
 }
