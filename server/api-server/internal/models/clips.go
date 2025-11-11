@@ -15,10 +15,10 @@ type CreateBlobClipRequest struct {
 }
 
 // RESPONSE
-
 type ClipResponse struct {
 	ID        string    `json:"id"`
-	Content   string    `json:"content,omitempty"`
 	InBlob    bool      `json:"in_blob"`
+	Content   string    `json:"content,omitempty"`
+	BlobUrl   string    `json:"blob_url,omitempty"`
 	CreatedAt time.Time `json:"created_at"`
 }

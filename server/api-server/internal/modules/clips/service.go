@@ -13,6 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/minio/minio-go/v7"
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
@@ -20,13 +21,15 @@ type ClipService struct {
 	DB        *gorm.DB
 	Blob      *minio.Client
 	OutboxBus *outbox.Bus
+	Cache     *redis.Client
 }
 
-func NewService(db *gorm.DB, blob *minio.Client, bus *outbox.Bus) *ClipService {
+func NewService(db *gorm.DB, blob *minio.Client, cache *redis.Client, bus *outbox.Bus) *ClipService {
 	return &ClipService{
 		DB:        db,
 		Blob:      blob,
 		OutboxBus: bus,
+		Cache:     cache,
 	}
 }
 
@@ -183,4 +186,48 @@ func (s *ClipService) GetClips(before string, userID int) ([]gin.H, error) {
 	}
 
 	return result, nil
+}
+
+func (s *ClipService) GetLatestClipFromDB(userID int) (models.ClipResponse, error) {
+	var clip models.Clip
+	err := s.
+		DB.
+		Where("user_id = ?", userID).
+		Order("created_at desc").
+		Limit(1).
+		First(&clip).Error
+	if err != nil {
+		return models.ClipResponse{}, err
+	}
+
+	response := models.ClipResponse{
+		ID:        clip.ID,
+		InBlob:    clip.InBlob,
+		Content:   clip.Content,
+		CreatedAt: clip.CreatedAt,
+	}
+
+	if clip.InBlob {
+		blobUrl, _ := s.GetClipBlobUrl(&clip)
+		response.BlobUrl = blobUrl
+	}
+
+	return response, nil
+}
+
+func (s *ClipService) GetClipBlobUrl(clip *models.Clip) (string, error) {
+	var meta models.ClipBlobMetadata
+	if err := s.DB.First(&meta, "clip_id = ?", clip.ID).Error; err != nil {
+		return "Not found", err
+	}
+
+	url, err := s.Blob.PresignedGetObject(
+		context.Background(),
+		meta.Bucket,
+		meta.ObjectKey,
+		30*time.Minute,
+		nil,
+	)
+
+	return url.String(), err
 }

@@ -1,7 +1,11 @@
 package clips
 
 import (
+	"context"
+	"encoding/json"
+	"fmt"
 	"strings"
+	"time"
 
 	"api-server/internal/models"
 	apiUtils "api-server/internal/utils"
@@ -110,4 +114,31 @@ func (h *ClipHandler) GetClips(c *gin.Context) {
 	}
 
 	c.JSON(200, result)
+}
+
+func (h *ClipHandler) GetLatestClip(c *gin.Context) {
+	userID := apiUtils.GetUserIdFromContext(c)
+	key := fmt.Sprintf("clips:latest:user:%d", userID)
+	ctx := context.Background()
+
+	// Check Redis
+	val, err := h.Service.Cache.Get(ctx, key).Result()
+	if err == nil {
+		var clip models.ClipResponse
+		_ = json.Unmarshal([]byte(val), &clip)
+
+		c.JSON(200, clip)
+		return
+	}
+
+	// Cache miss, fetch from DB and store in redis
+	clip, err := h.Service.GetLatestClipFromDB(userID)
+	if err != nil {
+		c.JSON(500, gin.H{"message": "Failed to fetch latest clip"})
+	}
+
+	clipByte, _ := json.Marshal(&clip)
+	_ = h.Service.Cache.Set(ctx, key, clipByte, 5*time.Minute)
+
+	c.JSON(200, clip)
 }

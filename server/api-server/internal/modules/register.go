@@ -8,11 +8,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/minio/minio-go/v7"
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
-func RegisterAll(r *gin.Engine, db *gorm.DB, blob *minio.Client, bus *outbox.Bus) {
+func RegisterAll(r *gin.Engine, db *gorm.DB, blob *minio.Client, cache *redis.Client, bus *outbox.Bus) {
 	users.Register(db, r)
-	clips.Register(db, blob, bus, r)
+	clips.Register(db, blob, cache, bus, r)
 	auth.Register(db, r)
 }
