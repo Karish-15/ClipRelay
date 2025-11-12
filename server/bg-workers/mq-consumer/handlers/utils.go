@@ -41,7 +41,7 @@ func (h *ConsumerHandler) RedisFetchClip(key string, ctx context.Context) (*mode
 }
 
 func (h *ConsumerHandler) RedisUpdateLatestAndPublish(clip *models.ClipResponse, userID int, ctx context.Context) error {
-	key := fmt.Sprintf("clip:latest:user:%d", userID)
+	key := fmt.Sprintf("clips:latest:user:%d", userID)
 
 	existing, err := h.RedisFetchClip(key, ctx)
 	if err != nil {
@@ -63,7 +63,7 @@ func (h *ConsumerHandler) RedisUpdateLatestAndPublish(clip *models.ClipResponse,
 	log.Printf("Redis clip updated for user %d -> key=%s", userID, key)
 
 	// Publish key to Redis pubsub
-	channel := fmt.Sprintf("clip:user:%d", userID)
+	channel := fmt.Sprintf("clips:user:%d", userID)
 	if err = h.Redis.Publish(ctx, channel, data).Err(); err != nil {
 		log.Printf("Error publishing clip for user ID: %v. error: %v", userID, err)
 	}
