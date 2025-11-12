@@ -72,6 +72,21 @@ services:
       - rabbitmq
     networks:
       - cliprelay-net
+  
+  mq-consumer:
+    build:
+      context: ./server/bg-workers/mq-consumer
+      dockerfile: Dockerfile
+    container_name: cliprelay-mq-consumer
+    restart: always
+    env_file: 
+      - ./server/bg-workers/mq-consumer/.env
+    depends_on:
+      - rabbitmq
+      - redis
+      - minio
+    networks: 
+      - cliprelay-net
 
 volumes:
   postgres_data:
