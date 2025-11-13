@@ -21,6 +21,16 @@ services:
       - "traefik.enable=true"
       - "traefik.http.middlewares.strip-events.replacepathregex.regex=^/events/[0-9]+$"
       - "traefik.http.middlewares.strip-events.replacepathregex.replacement=/events"
+      
+  client:
+    build:
+      context: .
+      dockerfile: client.Dockerfile
+    container_name: cliprelay-client
+    ports:
+      - "8080:80"      # FE will be accessible at localhost:8080
+    restart: unless-stopped
+
 
   postgres:
     image: postgres:16
