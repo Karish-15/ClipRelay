@@ -34,7 +34,7 @@ func (h *ConsumerHandler) ProcessWithRetries(d amqp091.Delivery, workerID int) {
 		attempt++
 		err := h.HandleEvent(d)
 		if err == nil {
-			if errAck := d.Ack(true); errAck != nil {
+			if errAck := d.Ack(false); errAck != nil {
 				log.Printf("[w%d] ack error: %v", workerID, errAck)
 			}
 			return
