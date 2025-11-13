@@ -1,6 +1,8 @@
 package middlewares
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
 	"os"
 
@@ -43,10 +45,45 @@ func JWTMiddleware() gin.HandlerFunc {
 
 		// Inject user info into context
 		// sub is stored as float64 in JSON map
-		c.Set("userID", int(claims["sub"].(float64)))
+		userIDStr, err := ExtractUserIDFromJWT(tokenStr)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token claims"})
+			c.Abort()
+			return
+		}
+		c.Set("userID", userIDStr)
 		c.Set("username", claims["username"].(string))
 
 		// Continue to the route handler
 		c.Next()
 	}
+}
+
+func ExtractUserIDFromJWT(tokenString string) (string, error) {
+	secret := []byte(os.Getenv("JWT_SECRET"))
+
+	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (any, error) {
+		// Make sure the signing method is HMAC
+		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
+		}
+		return secret, nil
+	})
+	if err != nil {
+		return "", errors.New("invalid token")
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return "", errors.New("invalid claims")
+	}
+
+	// Try user_id as string or numeric
+	if id, ok := claims["sub"].(string); ok {
+		return id, nil
+	}
+	if f, ok := claims["sub"].(float64); ok {
+		return fmt.Sprintf("%.0f", f), nil
+	}
+	return "", errors.New("user_id not found in token")
 }

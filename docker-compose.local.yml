@@ -46,6 +46,28 @@ services:
     networks:
       - cliprelay-net
 
+  pgbouncer:
+    image: edoburu/pgbouncer
+    container_name: cliprelay-pgbouncer
+    restart: always
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: cliprelay
+      DB_PASSWORD: cliprelay
+      POOL_MODE: transaction
+    ports:
+      - "6432:6432"
+    volumes:
+      - ./pgbouncer/pgbouncer.ini:/etc/pgbouncer/pgbouncer.ini
+      - ./pgbouncer/userlist.txt:/etc/pgbouncer/userlist.txt
+    depends_on:
+      - postgres
+    networks:
+      - cliprelay-net
+
+
+
   # ------------------------------------------------------------
   # REDIS
   # ------------------------------------------------------------
@@ -198,12 +220,37 @@ services:
   # ------------------------------------------------------------
   # API SERVER
   # ------------------------------------------------------------
+  # api-server:
+  #   build:
+  #     context: ./server/api-server
+  #     dockerfile: Dockerfile
+  #   container_name: cliprelay-api-server
+  #   restart: always
+  #   env_file:
+  #     - ./server/api-server/.env
+  #   depends_on:
+  #     postgres:
+  #       condition: service_started
+  #     redis:
+  #       condition: service_started
+  #     rabbitmq:
+  #       condition: service_healthy
+  #     minio:
+  #       condition: service_started
+  #   networks:
+  #     - cliprelay-net
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.http.routers.api.rule=PathPrefix(`/`)"
+  #     - "traefik.http.routers.api.entrypoints=web"
+  #     - "traefik.http.services.api.loadbalancer.server.port=8080"
+
   api-server:
     build:
       context: ./server/api-server
       dockerfile: Dockerfile
-    container_name: cliprelay-api-server
-    restart: always
+    deploy:
+      replicas: 3
     env_file:
       - ./server/api-server/.env
     depends_on:
@@ -215,6 +262,7 @@ services:
         condition: service_healthy
       minio:
         condition: service_started
+    restart: always
     networks:
       - cliprelay-net
     labels:

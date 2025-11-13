@@ -1,6 +1,7 @@
 package initializers
 
 import (
+	"fmt"
 	"os"
 	"strings"
 
@@ -27,6 +28,9 @@ func InitConsistentHashingRing() *consistent.Consistent {
 	if gatewaysEnv == "" {
 		return nil
 	}
+
+	fmt.Println("GATEWAYS RAW:", os.Getenv("GATEWAYS"))
+	fmt.Printf("GATEWAYS PARSED: %#v\n", strings.Split(os.Getenv("GATEWAYS"), ","))
 
 	addrs := strings.Split(gatewaysEnv, ",")
 	members := make([]consistent.Member, len(addrs))

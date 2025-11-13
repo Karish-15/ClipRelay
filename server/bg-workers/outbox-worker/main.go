@@ -8,10 +8,12 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
 func main() {
+	godotenv.Load()
 	ctx := context.Background()
 
 	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
@@ -69,7 +71,7 @@ func main() {
 		}
 
 		log.Printf("published %d events to queue", len(ids))
-		sleep(pollMS)
+		// sleep(pollMS)
 	}
 }
 

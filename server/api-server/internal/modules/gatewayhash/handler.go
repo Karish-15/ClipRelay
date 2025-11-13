@@ -1,6 +1,8 @@
 package gatewayhash
 
 import (
+	"fmt"
+
 	"github.com/buraksezer/consistent"
 	"github.com/gin-gonic/gin"
 )
@@ -17,6 +19,8 @@ func NewHandler(Ring *consistent.Consistent) *Handler {
 
 func (h *Handler) ResolveGateway(c *gin.Context) {
 	userIDStr := c.GetString("userID")
+
+	fmt.Printf("HASH-KEY-DEBUG: '%s'\n", userIDStr)
 
 	member := h.Ring.LocateKey([]byte(userIDStr))
 	gateway := member.String()

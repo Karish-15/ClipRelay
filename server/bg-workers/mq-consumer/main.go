@@ -16,8 +16,8 @@ import (
 )
 
 const (
-	workerFactor  = 2    // workers = CPU * workerFactor
-	jobBufferSize = 1000 // buffered channel size for incoming deliveries
+	workerFactor  = 10    // workers = CPU * workerFactor
+	jobBufferSize = 50000 // buffered channel size for incoming deliveries
 )
 
 func main() {
@@ -35,7 +35,7 @@ func main() {
 		workers = 2
 	}
 
-	if err := handler.Consumer.Channel.Qos(workers, 0, false); err != nil {
+	if err := handler.Consumer.Channel.Qos(1000, 0, false); err != nil {
 		log.Fatalf("set qos: %v", err)
 	}
 

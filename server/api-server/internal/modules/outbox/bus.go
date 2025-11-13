@@ -63,7 +63,7 @@ func (b *Bus) insertOne(e Event) error {
 func (b *Bus) Start(ctx context.Context) {
 	go func() {
 		batch := make([]models.Outbox, 0, b.batchSize)
-		ticker := time.NewTicker(300 * time.Millisecond)
+		ticker := time.NewTicker(20 * time.Millisecond)
 		defer ticker.Stop()
 
 		for {

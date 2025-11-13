@@ -91,5 +91,6 @@ func (h *ConsumerHandler) HandleEvent(d amqp091.Delivery) error {
 	if err := h.RedisUpdateLatestAndPublish(&clip, payload.UserID, ctx); err != nil {
 		log.Printf("Error while updating and publishing clip to redis: %v", err)
 	}
+
 	return nil
 }

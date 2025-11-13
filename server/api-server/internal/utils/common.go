@@ -1,9 +1,13 @@
 package utils
 
-import "github.com/gin-gonic/gin"
+import (
+	"strconv"
+
+	"github.com/gin-gonic/gin"
+)
 
 func GetUserIdFromContext(c *gin.Context) int {
 	userIDVal, _ := c.Get("userID")
-	userID := userIDVal.(int)
+	userID, _ := strconv.Atoi(userIDVal.(string))
 	return userID
 }

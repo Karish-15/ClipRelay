@@ -34,6 +34,8 @@ func (h *Handler) SSEHandler() http.HandlerFunc {
 			return
 		}
 
+		fmt.Printf("HASH-KEY-DEBUG: '%s'\n", userID)
+
 		// Check consistent hash ownership
 		owner := utils.HashRing.LocateKey([]byte(userID)).String()
 		if owner != utils.GatewayAddr {
