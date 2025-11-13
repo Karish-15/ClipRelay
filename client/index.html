@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clip Relay</title>
+    
+    <!-- redirect before loading anything else -->
+    <script>
+        if (!localStorage.getItem("jwt")) {
+            window.location = "login.html";
+        }
+    </script>
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+<div class="container">
+
+    <h2>Clip Relay</h2>
+
+    <h3>Paste Text or Image</h3>
+    <textarea id="pasteBox" placeholder="Paste here (Ctrl+V)..."></textarea>
+
+    <div id="clip-list"></div>
+
+    <button id="load-more" onclick="loadHistory()">Load more</button>
+
+</div>
+
+
+<script src="app.js"></script>
+</body>
+</html>

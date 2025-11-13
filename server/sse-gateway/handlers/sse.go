@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"sse/utils"
@@ -20,11 +21,12 @@ type ClipResponse struct {
 
 func (h *Handler) SSEHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		token := r.Header.Get("Authorization")
+		token := r.URL.Query().Get("token")
 		if token == "" {
-			http.Error(w, "Missing Authorization header", http.StatusUnauthorized)
+			http.Error(w, "Missing token", http.StatusUnauthorized)
 			return
 		}
+		token = strings.TrimSpace(token)
 
 		userID, err := utils.ExtractUserIDFromJWT(token)
 		if err != nil {
