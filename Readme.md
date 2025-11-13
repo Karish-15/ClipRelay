@@ -10,6 +10,9 @@ ClipRelay supports **both text clips and  images**. Blobs are stored externally 
 
 ClipRelay is composed of several independent Go services working together through message passing, Redis caching, and SSE-based real-time propagation.
 
+<p align="center">
+  <img src="./Design.png" alt="System Design">
+</p>
 ---
 
 ## API Server
