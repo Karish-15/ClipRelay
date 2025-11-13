@@ -1,0 +1,70 @@
+# ===========================
+# Go Build Artifacts
+# ===========================
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Go cache & build directories
+/bin
+/build
+/dist
+/tmp
+/.cache
+
+# Go coverage files
+*.cover
+*.cov
+coverage.out
+coverage.html
+
+# Generated mocks (if using mockgen)
+**/mocks/
+
+# Module & vendor
+vendor/
+go.work
+go.work.sum
+
+# ===========================
+# Air Hot Reload (temp builds)
+# ===========================
+tmp/
+.air.toml.bak
+
+# ===========================
+# IDE/Editor Stuff
+# ===========================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# JetBrains Goland
+*.iml
+out/
+
+# ===========================
+# OS-specific garbage
+# ===========================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===========================
+# Env / Secrets
+# ===========================
+.env
+*.local
+*.dev.env
+
+# ===========================
+# Logs
+# ===========================
+*.log
+logs/
+log/
