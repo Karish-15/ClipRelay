@@ -1,8 +1,18 @@
 # ClipRelay
 
-ClipRelay is a lightweight, high-performance system for transferring text and image clips across devices through real-time streaming. It solves a practical workflow issue: moving clipboard content from a Windows PC to a tablet used for handwritten note-taking. Existing tools (such as Samsung Notes sync and OEM clipboard sharing) frequently introduce sync delays, conflict issues, and inconsistent cross-device behavior. ClipRelay provides a fast, predictable, and conflict-free syncing mechanism using a distributed, event-driven backend.
+ClipRelay is a lightweight, high-performance system for transferring text and image clips across devices through real-time streaming. 
 
-ClipRelay supports **both text clips and  images**. Blobs are stored externally using presigned uploads and delivered via efficient URL propagation through the event pipeline.
+It solves a practical workflow issue: moving clipboard content from a Windows PC to a tablet used for handwritten note-taking. Existing tools (such as Samsung Notes sync and OEM clipboard sharing) frequently introduce sync delays, conflict issues, and inconsistent cross-device behavior. ClipRelay provides a fast, predictable, and conflict-free syncing mechanism using a distributed, event-driven backend.
+
+
+## Highlights
+
+- High-throughput API layer with multiple replicas behind a load balancer for parallel clip ingestion.  
+- Consistent-hashing–based SSE gateway assignment for stable routing and scalable real-time streaming.  
+- Outbox → RabbitMQ → Redis Pubsub event pipeline ensuring durable, predictable, and lightweight propagation.  
+- Redis LWW (Last-Write-Wins) state store providing deterministic, idempotent updates under at-least-once delivery.  
+- Presigned S3-compatible blob handling enabling reliable and conflict-free image synchronization.  
+- Sustains **9k requests/sec** (text clip creation) across API replicas, **16k Transactions/sec** on Postgres with **0 SSE drops**.  Thoughput can be improved by dropping GORM and using SQL queries instead.
 
 ---
 
@@ -13,7 +23,8 @@ ClipRelay is composed of several independent Go services working together throug
 <p align="center">
   <img src="./Design.png" alt="System Design">
 </p>
----
+
+
 
 ## API Server
 
@@ -102,6 +113,17 @@ Devices always receive the latest clip with correct ordering and without duplica
 
 ---
 
+# API Endpoints
+
+| Endpoint | Method | Description |
+|---------|--------|-------------|
+| `/login` | POST | Authenticate a user and return a JWT token. |
+| `/clips` | GET | Fetch paginated clips. Supports `?before=<clip_id>` for backwards pagination. |
+| `/clips/latest` | GET | Fetch the latest clip from Redis for low-latency state retrieval. |
+| `/sse` | GET | Return the assigned SSE gateway for the authenticated user. |
+| `/events/{gateway_id}` | GET | Establish an SSE stream with the assigned gateway (requires `token=<JWT>` query param). |
+
+---
 # Why ClipRelay Exists
 
 Transferring clipboard content from a Windows PC to a tablet—especially during coding, researching, and handwritten note-taking—was unreliable using vendor ecosystem syncing tools.
@@ -123,6 +145,8 @@ ClipRelay eliminates these issues by providing:
 - Low-latency, predictable UI updates via SSE  
 
 ClipRelay is built as a clean, reliable solution to a real personal workflow problem, with an architecture designed to be understandable, scalable, and correct.
+
+---
 
 # Deployment
 
